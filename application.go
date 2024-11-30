@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 )
 
 type storage interface {
 	Set(string, string)
 	Get(string) (string, bool)
+	GetMap() map[string]string
 }
 
 type application struct {
@@ -17,8 +18,11 @@ type application struct {
 
 func (a *application) health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("%v\n", a.store)))
-	//w.Write([]byte("ok"))
+	jsonData, err := json.MarshalIndent(a.store.GetMap(), "", "	")
+	if err != nil {
+		log.Fatalf("error marshaling JSON: %v", err)
+	}
+	w.Write(jsonData)
 }
 
 func (a *application) set(w http.ResponseWriter, r *http.Request) {

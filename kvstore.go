@@ -40,6 +40,12 @@ func (kv *KVStore) Get(key string) (string, bool) {
 	return value, exists
 }
 
+func (kv *KVStore) GetMap() map[string]string {
+	kv.mux.RLock()
+	kv.mux.RUnlock()
+	return kv.store 
+}
+
 func (kv *KVStore) log(key, value string) error {
 	file, err := os.OpenFile(kv.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -72,7 +78,6 @@ func (kv *KVStore) load() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		splitted := strings.Split(scanner.Text(), ":")
-		log.Println(splitted[0])
 		key := splitted[0]
 		value := ""
 		if len(splitted) > 1 {
