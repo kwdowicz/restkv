@@ -2,16 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
-var store *KVStore
-
 func main() {
-	store = NewKVStore()
-	http.HandleFunc("/set", set) 
-	http.HandleFunc("/get", get) 
-
+	store := NewKVStore()
+	app := &application{store: store}
+	r := chi.NewRouter()
+	r.Mount("/v1", v1Router(*app))
 	fmt.Println("Server is listening on port 8080...")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
