@@ -35,15 +35,20 @@ func (kv *KVStore) Set(key, value string) {
 
 func (kv *KVStore) Get(key string) (string, bool) {
 	kv.mux.RLock()
-	kv.mux.RUnlock()
+	defer kv.mux.RUnlock()
 	value, exists := kv.store[key]
 	return value, exists
 }
 
 func (kv *KVStore) GetMap() map[string]string {
 	kv.mux.RLock()
-	kv.mux.RUnlock()
-	return kv.store 
+	defer kv.mux.RUnlock()
+	// TODO: Should I make a copy?
+	copy := make(map[string]string)
+	for k, v := range kv.store {
+		copy[k] = v
+	}
+	return copy 
 }
 
 func (kv *KVStore) log(key, value string) error {
@@ -77,7 +82,7 @@ func (kv *KVStore) load() {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		splitted := strings.Split(scanner.Text(), ":")
+		splitted := strings.SplitN(scanner.Text(), ":", 2)
 		key := splitted[0]
 		value := ""
 		if len(splitted) > 1 {
