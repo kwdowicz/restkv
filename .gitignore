@@ -6,6 +6,7 @@
 *.bin
 *.o
 *.a
+*.txt
 
 # Test binary
 *.test
